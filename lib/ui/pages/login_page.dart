@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AttendanceLoginScreen extends StatefulWidget {
-  const AttendanceLoginScreen({Key? key}) : super(key: key);
+  const AttendanceLoginScreen({super.key});
 
   @override
   State<AttendanceLoginScreen> createState() => _AttendanceLoginScreenState();
@@ -30,7 +30,6 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo/Icon
                 // Logo/Icon
                 Container(
                   width: 200,
