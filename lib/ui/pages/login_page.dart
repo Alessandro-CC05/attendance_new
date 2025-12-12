@@ -125,7 +125,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                       // Handle login
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 127, 200, 129),
+                      backgroundColor: Color(0xFF46ad5a),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -145,13 +145,32 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 const SizedBox(height: 24),
                 
                 // OR SIGN
-                Text(
-                  'OR SIGN',
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 163, 163, 163),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Divider(
+                        color: Color.fromARGB(255, 163, 163, 163), // Colore della linea
+                        thickness: 1, // Spessore della linea
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Text(
+                        'OR SIGN',
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 163, 163, 163),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Divider(
+                        color: Color.fromARGB(255, 163, 163, 163), // Colore della linea
+                        thickness: 1,
+                      ),
+                    ),
+                  ],
                 ),
                 
                 const SizedBox(height: 20),
@@ -258,7 +277,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 127, 200, 129),
+          backgroundColor: const Color(0xFF46ad5a),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
