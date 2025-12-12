@@ -31,67 +31,25 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo/Icon
+                // Logo/Icon
                 Container(
                   width: 200,
                   height: 200,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 20,
-                        left: 20,
-                        child: _buildPuzzlePiece(100, 80),
-                      ),
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: _buildPuzzlePiece(100, 80),
-                      ),
-                      Positioned(
-                        bottom: 20,
-                        left: 20,
-                        child: _buildPuzzlePiece(100, 80),
-                      ),
-                      Positioned(
-                        bottom: 20,
-                        right: 20,
-                        child: _buildPuzzlePiece(100, 80),
-                      ),
-                      Center(
-                        child: Container(
-                          width: 80,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.calendar_today, 
-                                color: Colors.green[200], size: 30),
-                              const SizedBox(height: 8),
-                              Container(
-                                width: 50,
-                                height: 3,
-                                color: Colors.green[200],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                  child: Image.asset(
+                    'lib/images/logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
+                
                 
                 const SizedBox(height: 30),
                 
                 // Title
                 const Text(
-                  'Attendance Tracker',
+                  'Attendance',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
