@@ -242,7 +242,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
+        color: Colors.white.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(15),
       ),
     );
@@ -257,7 +257,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(

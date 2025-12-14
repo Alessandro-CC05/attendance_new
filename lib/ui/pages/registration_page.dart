@@ -260,7 +260,7 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3), 
+        color: Colors.white.withValues(alpha: 0.3), 
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(

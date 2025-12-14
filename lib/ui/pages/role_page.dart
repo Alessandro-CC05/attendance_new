@@ -123,8 +123,8 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: isSelected 
-                  ? const Color(0xFF46ad5a).withOpacity(0.2) 
-                  : Colors.white.withOpacity(0.05), 
+                  ? const Color(0xFF46ad5a).withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.05), 
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected ? const Color(0xFF46ad5a) : Colors.transparent,
