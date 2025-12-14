@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
-import 'registration_page.dart';
+import './role_page.dart';
 
-class AttendanceLoginScreen extends StatefulWidget {
-  const AttendanceLoginScreen({super.key});
+class AttendanceRegisterScreen extends StatefulWidget {
+  const AttendanceRegisterScreen({super.key});
 
   @override
-  State<AttendanceLoginScreen> createState() => _AttendanceLoginScreenState();
+  State<AttendanceRegisterScreen> createState() => _AttendanceRegisterScreenState();
 }
 
-class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
+class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
+
+  final _nameController = TextEditingController();
+  final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
   bool _obscurePassword = true;
 
   @override
   void dispose() {
+    _nameController.dispose();
+    _surnameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -23,54 +29,67 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       backgroundColor: const Color.fromARGB(255, 36, 36, 36),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            
+            Navigator.pop(context);
+          },
+        ),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo/Icon
-                Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Image.asset(
-                    'lib/images/logo.png',
-                    fit: BoxFit.contain,
-                  ),
-                ),
                 
-                
-                const SizedBox(height: 30),
-                
-                // Title
+                // Titolo
                 const Text(
-                  'Attendance',
+                  'Create Account',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                
                 const SizedBox(height: 8),
-                
-                // Subtitle
-                Text(
-                  'Easily manage class attendance',
+                const Text(
+                  'Sign up to get started',
                   style: TextStyle(
                     fontSize: 16,
-                    color: const Color.fromARGB(255, 189, 189, 189),
+                    color: Color.fromARGB(255, 189, 189, 189),
                   ),
                 ),
                 
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 
-                // Email Input
+                // Campo Nome
+                _buildInputField(
+                  controller: _nameController,
+                  icon: Icons.person_outline,
+                  hintText: 'First Name',
+                ),
+
+                const SizedBox(height: 16),
+
+                // Campo Cognome
+                _buildInputField(
+                  controller: _surnameController,
+                  icon: Icons.person_outline,
+                  hintText: 'Last Name',
+                ),
+
+                const SizedBox(height: 16),
+                
+                // Campo Email
                 _buildInputField(
                   controller: _emailController,
                   icon: Icons.email_outlined,
@@ -79,7 +98,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 
                 const SizedBox(height: 16),
                 
-                // Password Input
+                // Campo Password
                 _buildInputField(
                   controller: _passwordController,
                   icon: Icons.vpn_key_outlined,
@@ -98,42 +117,30 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                   ),
                 ),
                 
-                const SizedBox(height: 12),
+                const SizedBox(height: 30),
                 
-                // Forgot Password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {},
-                    child: Text(
-                      'Forgot your password?',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Log In Button
+                // Pulsante Sign Up
                 SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Handle login
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const RoleSelectionScreen(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF46ad5a),
+                      backgroundColor: const Color(0xFF46ad5a), 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                     ),
                     child: const Text(
-                      'Log In',
+                      'Sign Up',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -145,13 +152,13 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 
                 const SizedBox(height: 24),
                 
-                // OR SIGN
+                
                 Row(
                   children: [
                     const Expanded(
                       child: Divider(
-                        color: Color.fromARGB(255, 163, 163, 163), 
-                        thickness: 1, 
+                        color: Color.fromARGB(255, 163, 163, 163),
+                        thickness: 1,
                       ),
                     ),
                     Padding(
@@ -167,7 +174,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                     ),
                     const Expanded(
                       child: Divider(
-                        color: Color.fromARGB(255, 163, 163, 163), 
+                        color: Color.fromARGB(255, 163, 163, 163),
                         thickness: 1,
                       ),
                     ),
@@ -176,28 +183,41 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 
                 const SizedBox(height: 20),
                 
-                // Social Login Buttons
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: _buildSocialButton(
-                        'Google',
-                        Icons.g_mobiledata,
-                        () {},
+                
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white, 
+                      foregroundColor: Colors.black, 
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    icon: const Icon(Icons.g_mobiledata, size: 28, color: Colors.red), 
+                    label: const Text(
+                      'Continue with Google',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
+                  ),
                 ),
                 
                 const SizedBox(height: 30),
                 
-                // Sign Up
+                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'New to ',
+                    const Text(
+                      'Already have an account? ',
                       style: TextStyle(
                         color: Color.fromARGB(255, 163, 163, 163),
                         fontSize: 16,
@@ -205,45 +225,28 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AttendanceRegisterScreen(),
-                          ),
-                        );
+                        Navigator.pop(context);
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(50, 30),
                       ),
-                      child: Text(
-                        'Sign Up',
+                      child: const Text(
+                        'Log In',
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 196, 196, 196),
-                          fontSize: 18,
+                          color: Color(0xFF46ad5a),
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
                 ),
-                
-
+                const SizedBox(height: 20),
               ],
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildPuzzlePiece(double width, double height) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(15),
       ),
     );
   }
@@ -257,46 +260,22 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.3),
+        color: Colors.white.withOpacity(0.3), 
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: controller,
         obscureText: obscureText,
-        style: const TextStyle(color: Color.fromARGB(221, 0, 0, 0)),
+        style: const TextStyle(color: Colors.white), 
         decoration: InputDecoration(
           prefixIcon: Icon(icon, color: const Color.fromARGB(255, 213, 213, 213)),
           suffixIcon: suffixIcon,
           hintText: hintText,
-          hintStyle: TextStyle(color: const Color.fromARGB(255, 215, 215, 215)),
+          hintStyle: const TextStyle(color: Color.fromARGB(255, 215, 215, 215)),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 20,
             vertical: 18,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(String text, IconData icon, VoidCallback onPressed) {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF46ad5a),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
           ),
         ),
       ),
