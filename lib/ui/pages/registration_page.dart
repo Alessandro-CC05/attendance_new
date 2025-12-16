@@ -1,3 +1,5 @@
+import 'package:attendance_new/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './role_page.dart';
 
@@ -12,10 +14,16 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
 
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
-  final _emailController = TextEditingController();
+  final _emailController= TextEditingController();
   final _passwordController = TextEditingController();
   
   bool _obscurePassword = true;
+
+  Future<void> createUser() async{
+    try{
+      await AuthService().createUserWithEmailAndPassword(email: _emailController.text, password: _passwordController.text);
+    }on FirebaseAuthException catch (error){}
+  }
 
   @override
   void dispose() {
@@ -124,7 +132,8 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async{
+                      await createUser();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
