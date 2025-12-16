@@ -18,11 +18,57 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
   final _passwordController = TextEditingController();
   
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   Future<void> createUser() async{
+    debugPrint('Tentativo registrazione...');
+    debugPrint('Email: ${_emailController.text}');
+
+    if (_emailController.text.trim().isEmpty || 
+    _passwordController.text.isEmpty){
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('compila tutti i campi'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading =true);
+
     try{
-      await AuthService().createUserWithEmailAndPassword(email: _emailController.text, password: _passwordController.text);
-    }on FirebaseAuthException catch (error){}
+      final user = await AuthService().createUserWithEmailAndPassword(
+        email: _emailController.text.trim(), 
+        password: _passwordController.text
+        );
+
+        debugPrint('✅ Utente creato: ${user?.uid}');
+
+      if (mounted){
+        Navigator.pushReplacement(
+          context, 
+          MaterialPageRoute(
+            builder: (context) => const RoleSelectionScreen(),
+            ),
+          );
+      }
+    }catch (e){
+      debugPrint('❌ Errore: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -132,15 +178,7 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () async{
-                      await createUser();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RoleSelectionScreen(),
-                        ),
-                      );
-                    },
+                    onPressed: _isLoading? null : createUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF46ad5a), 
                       shape: RoundedRectangleBorder(
@@ -148,7 +186,16 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: _isLoading
+                    ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                        ),
+                    )
+                    : const Text(
                       'Sign Up',
                       style: TextStyle(
                         fontSize: 18,
