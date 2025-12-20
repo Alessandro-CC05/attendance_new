@@ -1,5 +1,4 @@
 import 'package:attendance_new/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './role_page.dart';
 
@@ -24,7 +23,10 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
     debugPrint('Tentativo registrazione...');
     debugPrint('Email: ${_emailController.text}');
 
-    if (_emailController.text.trim().isEmpty || 
+    if (
+    _nameController.text.trim().isEmpty ||
+    _surnameController.text.trim().isEmpty||
+    _emailController.text.trim().isEmpty || 
     _passwordController.text.isEmpty){
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -39,6 +41,8 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
 
     try{
       final user = await AuthService().createUserWithEmailAndPassword(
+        name: _nameController.text.trim(),
+        surname: _surnameController.text.trim(),
         email: _emailController.text.trim(), 
         password: _passwordController.text
         );

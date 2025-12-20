@@ -34,6 +34,8 @@ class MyApp extends StatelessWidget {
           }
           
           // Se l'utente è loggato
+
+          /*
           if(snapshot.hasData){
             return const Scaffold(
               body: Center(
@@ -41,6 +43,7 @@ class MyApp extends StatelessWidget {
               ),
             );
           }
+          */
           
           // Se l'utente NON è loggato
           return const AttendanceLoginScreen();
