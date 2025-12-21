@@ -43,9 +43,22 @@ class AuthService {
         'email': email,
         'role': null,
       });
+
       return user;
+
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
+    }
+  }
+
+  Future<void> updateRole(String uid, String role) async{
+    try{
+      await _firestore.collection('users').doc(uid).update({
+        'role': role
+      });
+    }
+    catch (e){
+      throw 'errore durante aggiornamento ruolo';
     }
   }
 

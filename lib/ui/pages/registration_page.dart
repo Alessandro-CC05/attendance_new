@@ -1,6 +1,6 @@
 import 'package:attendance_new/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import './role_page.dart';
+import 'roleSelection_page.dart';
 
 class AttendanceRegisterScreen extends StatefulWidget {
   const AttendanceRegisterScreen({super.key});
@@ -53,12 +53,12 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
         Navigator.pushReplacement(
           context, 
           MaterialPageRoute(
-            builder: (context) => const RoleSelectionScreen(),
+            builder: (context) => RoleSelectionScreen(userId: user!.uid),
             ),
           );
       }
     }catch (e){
-      debugPrint('❌ Errore: $e');
+      debugPrint('Errore: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
