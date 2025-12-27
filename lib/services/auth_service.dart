@@ -109,11 +109,17 @@ class AuthService {
             'authProvider': 'google',
           });
         }
+        return user;
       }
     }
     catch(e){
-      debugPrint('registrazione con google fallita');
+      debugPrint('❌ ERRORE GOOGLE SIGN-IN:');
+      debugPrint('   Errore: $e');  // ✅ Stampa l'errore completo
+      debugPrint('   Tipo: ${e.runtimeType}');  // ✅ Tipo di errore
+      debugPrint('   Stack trace:');
+      
     }
+    return null;
   }
 
   String _handleAuthException(FirebaseAuthException e) {
