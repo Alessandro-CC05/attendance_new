@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -37,7 +38,7 @@ class AuthService {
         password: password
       );
 
-      final user= userCredential.user;
+      final user = userCredential.user;
 
       await _firestore.collection('users').doc(user!.uid).set({
         'uid': user.uid,
@@ -45,6 +46,7 @@ class AuthService {
         'surname': surname,
         'email': email,
         'role': null,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
       return user;
@@ -54,14 +56,16 @@ class AuthService {
     }
   }
 
-  Future<void> updateRole(String uid, String role) async{
-    try{
+  Future<void> updateRole(String uid, String role) async {
+    try {
       await _firestore.collection('users').doc(uid).update({
-        'role': role
+        'role': role,
       });
-    }
-    catch (e){
-      throw 'errore durante aggiornamento ruolo';
+      
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+    } catch (e) {
+      throw 'Errore durante aggiornamento ruolo: $e';
     }
   }
 
@@ -71,8 +75,7 @@ class AuthService {
   }
 
   Future<User?> signInWithGoogle() async {
-    try{
-
+    try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -90,11 +93,11 @@ class AuthService {
       final userCredential = await _firebaseAuth.signInWithCredential(credential);
       final user = userCredential.user;
 
-      if (user != null){
+      if (user != null) {
         final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
-        if (!userDoc.exists){
-          debugPrint('creazione documento utente');
+        if (!userDoc.exists) {
+          debugPrint('Creazione documento utente Google');
 
           final nameParts = user.displayName?.split(' ') ?? ['', ''];
           final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
@@ -107,18 +110,74 @@ class AuthService {
             'email': user.email ?? '',
             'role': null,
             'authProvider': 'google',
+            'createdAt': FieldValue.serverTimestamp(),
           });
+
+          await Future.delayed(const Duration(milliseconds: 800));
+          
+          debugPrint('✅ Documento utente Google creato');
+        } else {
+          debugPrint('✅ Utente Google esistente trovato');
         }
+        
         return user;
       }
-    }
-    catch(e){
+    } catch (e) {
       debugPrint('❌ ERRORE GOOGLE SIGN-IN:');
-      debugPrint('   Errore: $e');  // ✅ Stampa l'errore completo
-      debugPrint('   Tipo: ${e.runtimeType}');  // ✅ Tipo di errore
-      debugPrint('   Stack trace:');
-      
+      debugPrint('   Errore: $e');
+      debugPrint('   Tipo: ${e.runtimeType}');
+      rethrow;
     }
+    return null;
+  }
+
+  Future<UserModel?> getCurrentUserData() async {
+    User? user = _firebaseAuth.currentUser;
+    if (user == null) {
+      debugPrint('❌ Nessun utente corrente');
+      return null;
+    }
+    
+    debugPrint('📥 Caricamento dati per utente: ${user.uid}');
+    
+    int maxRetries = 3;
+    int retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+      try {
+        DocumentSnapshot doc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        
+        if (!doc.exists) {
+          debugPrint('⚠️ Documento non trovato, tentativo ${retryCount + 1}/$maxRetries');
+          retryCount++;
+          
+          if (retryCount < maxRetries) {
+            await Future.delayed(Duration(milliseconds: 500 * retryCount));
+            continue;
+          }
+          
+          debugPrint('❌ Documento non trovato dopo $maxRetries tentativi');
+          return null;
+        }
+        
+        debugPrint('✅ Documento utente caricato');
+        return UserModel.fromFirestore(doc);
+        
+      } catch (e) {
+        debugPrint('❌ Errore caricamento dati: $e');
+        retryCount++;
+        
+        if (retryCount < maxRetries) {
+          await Future.delayed(Duration(milliseconds: 500 * retryCount));
+        } else {
+          rethrow;
+        }
+      }
+    }
+    
     return null;
   }
 

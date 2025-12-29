@@ -11,16 +11,16 @@ class RoleSelectionScreen extends StatefulWidget {
 
 class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
   String? _selectedRole;
-  bool _isLoading= false;
+  bool _isLoading = false;
 
-  Future<void> _selectRole(String role) async{
+  Future<void> _selectRole(String role) async {
     setState(() {
       _selectedRole = role;
     });
   }
-    
+
   Future<void> _saveAndContinue() async {
-    if (_selectedRole == null){
+    if (_selectedRole == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Select a role to continue'),
@@ -34,11 +34,24 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
       _isLoading = true;
     });
 
-    try{
+    try {
       await AuthService().updateRole(widget.userId, _selectedRole!);
-    }
-    catch (e) {
-      debugPrint('ruolo non salvato');
+      debugPrint('✅ Ruolo salvato: $_selectedRole');
+    } catch (e) {
+      debugPrint('❌ Errore salvataggio ruolo: $e');
+      
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Errore: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -53,6 +66,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
           elevation: 0,
           title: const Text("Select Role", style: TextStyle(color: Colors.white)),
           centerTitle: true,
+          automaticallyImplyLeading: false,
         ),
         body: SafeArea(
           child: Padding(
@@ -78,9 +92,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                     color: Color.fromARGB(255, 189, 189, 189),
                   ),
                 ),
-                
-                const Spacer(), 
-
+                const Spacer(),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -88,36 +100,41 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                       roleKey: 'professor',
                       label: 'Professore',
                       icon: Icons.school,
-                      onTap: () => _selectRole('professor')
+                      onTap: () => _selectRole('professor'),
                     ),
-                    
-                    const SizedBox(width: 20), 
-
+                    const SizedBox(width: 20),
                     _buildRoleCard(
                       roleKey: 'student',
                       label: 'Studente',
                       icon: Icons.person,
-                      onTap: () => _selectRole('student')
+                      onTap: () => _selectRole('student'),
                     ),
                   ],
                 ),
-                
                 const Spacer(),
-
                 SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton(
-                          onPressed: _selectedRole == null ? null : _saveAndContinue,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF46ad5a),
-                            disabledBackgroundColor: Colors.grey[700],
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: (_selectedRole == null || _isLoading) ? null : _saveAndContinue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF46ad5a),
+                      disabledBackgroundColor: Colors.grey[700],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
+                          )
+                        : const Text(
                             'Continue',
                             style: TextStyle(
                               fontSize: 18,
@@ -125,10 +142,9 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                               color: Colors.white,
                             ),
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
+                  ),
+                ),
+                const SizedBox(height: 30),
               ],
             ),
           ),
@@ -141,25 +157,21 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
     required String roleKey,
     required String label,
     required IconData icon,
-    required VoidCallback onTap
+    required VoidCallback onTap,
   }) {
     final isSelected = _selectedRole == roleKey;
 
     return Expanded(
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedRole = roleKey;
-          });
-        },
+        onTap: onTap,
         child: AspectRatio(
-          aspectRatio: 1, 
+          aspectRatio: 1,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
-              color: isSelected 
+              color: isSelected
                   ? const Color(0xFF46ad5a).withValues(alpha: 0.2)
-                  : Colors.white.withValues(alpha: 0.05), 
+                  : Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected ? const Color(0xFF46ad5a) : Colors.transparent,
