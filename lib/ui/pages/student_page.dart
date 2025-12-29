@@ -512,29 +512,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
             const SizedBox(height: 32),
 
-            _buildMenuOption(
-              icon: Icons.edit_outlined,
-              title: 'Edit Profile',
-              onTap: () {},
-            ),
-            _buildMenuOption(
-              icon: Icons.notifications_outlined,
-              title: 'Notifications',
-              onTap: () {},
-            ),
-            _buildMenuOption(
-              icon: Icons.security_outlined,
-              title: 'Privacy & Security',
-              onTap: () {},
-            ),
-            _buildMenuOption(
-              icon: Icons.help_outline,
-              title: 'Help & Support',
-              onTap: () {},
-            ),
-
-            const SizedBox(height: 24),
-
             SizedBox(
               width: double.infinity,
               height: 55,

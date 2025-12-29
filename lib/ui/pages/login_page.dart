@@ -220,7 +220,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 width: double.infinity,
                 height: 55,
                 child: ElevatedButton.icon(
-                  onPressed: _isGoogleLoading ? null : _signInWithGoogle, // ✅ Chiama il metodo
+                  onPressed: _isGoogleLoading ? null : _signInWithGoogle,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.black,
