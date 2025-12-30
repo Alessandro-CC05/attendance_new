@@ -1,6 +1,5 @@
 import 'package:attendance_new/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'roleSelection_page.dart';
 
 class AttendanceRegisterScreen extends StatefulWidget {
   const AttendanceRegisterScreen({super.key});
@@ -30,7 +29,7 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
       _passwordController.text.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('compila tutti i campi'),
+        content: Text('Compila tutti i campi'),
         backgroundColor: Colors.red,
       ),
     );
@@ -48,8 +47,12 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
     );
 
     debugPrint('✅ Utente creato: ${user?.uid}');
+
+    if (mounted && user != null) {
+      Navigator.of(context).pop(); 
+    }
   } catch (e) {
-    debugPrint('Errore: $e');
+    debugPrint('❌ Errore: $e');
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
