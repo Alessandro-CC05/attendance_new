@@ -6,6 +6,7 @@ import '../../models/user_model.dart';
 import '../pages/login_page.dart';
 import '../pages/student_page.dart';
 import '../pages/roleSelection_page.dart';
+import '../pages/teacher_page.dart';
 
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
@@ -54,7 +55,7 @@ class AuthWrapper extends StatelessWidget {
     } else if (userData.role == 'student') {
       return StudentHomeScreen(userData: userData);
     } else if (userData.role == 'professor') {
-      return _ComingSoonScreen(title: 'Teacher Dashboard');
+      return TeacherHomeScreen(userData: userData);
     } else {
       return _UnknownRoleScreen(role: userData.role ?? 'unknown');
     }
@@ -109,69 +110,6 @@ class _ErrorScreen extends StatelessWidget {
               child: const Text('Torna al Login'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ComingSoonScreen extends StatelessWidget {
-  final String title;
-
-  const _ComingSoonScreen({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 36, 36, 36),
-      body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.construction,
-                  size: 80,
-                  color: Color(0xFF46ad5a),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Coming Soon!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white70,
-                  ),
-                ),
-                const SizedBox(height: 48),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await AuthService().signOut();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.15),
-                    foregroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ),
-                  ),
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Log Out'),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
