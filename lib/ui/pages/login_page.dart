@@ -14,6 +14,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isGoogleLoading = false;
+  bool _isLoading = false;
 
   Future<void> _signInWithGoogle() async{
     setState(() {
@@ -50,6 +51,35 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
         );
       }
     }
+  }
+
+  Future<void> _signInWithEmailAndPassword() async{
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty
+        ){
+          debugPrint('email o password mancanti');
+          return;
+        }
+    
+    setState(() {
+        _isLoading = true;
+      });
+    
+    try{
+      await AuthService().signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text
+      );
+      debugPrint('✅autenticazione riuscita');
+    }
+    catch(e){
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('❌autenticazione non riuscita: $e');
+    }
+
+    return;
   }
 
   @override
@@ -161,9 +191,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle login
-                    },
+                    onPressed: _isLoading? null : _signInWithEmailAndPassword,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF46ad5a),
                       shape: RoundedRectangleBorder(
