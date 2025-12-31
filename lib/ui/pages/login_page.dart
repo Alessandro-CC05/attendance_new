@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'registration_page.dart';
 import 'package:attendance_new/services/auth_service.dart';
+import 'package:attendance_new/ui/pages/password_reset_page.dart';
 
 class AttendanceLoginScreen extends StatefulWidget {
   const AttendanceLoginScreen({super.key});
@@ -173,7 +174,14 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                    },
                     child: Text(
                       'Forgot your password?',
                       style: TextStyle(

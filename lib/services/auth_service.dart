@@ -32,6 +32,7 @@ class AuthService {
     required String email, 
     required String password
   }) async {
+    
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email, 
@@ -52,6 +53,16 @@ class AuthService {
       return user;
 
     } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+      debugPrint('✅ Email di reset password inviata a: $email');
+    } on FirebaseAuthException catch (e) {
+      debugPrint('❌ Errore reset password: ${e.code}');
       throw _handleAuthException(e);
     }
   }
