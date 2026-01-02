@@ -1,6 +1,5 @@
 import 'package:attendance_new/models/attendance_report_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/attendance_report_model.dart';
 
 class AttendanceReportService {
   final _firestore = FirebaseFirestore.instance;
