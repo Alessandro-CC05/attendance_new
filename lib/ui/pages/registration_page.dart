@@ -1,6 +1,5 @@
 import 'package:attendance_new/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'roleSelection_page.dart';
 
 class AttendanceRegisterScreen extends StatefulWidget {
   const AttendanceRegisterScreen({super.key});
@@ -18,59 +17,91 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
   
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
-  Future<void> createUser() async{
-    debugPrint('Tentativo registrazione...');
-    debugPrint('Email: ${_emailController.text}');
+  Future<void> createUser() async {
+  debugPrint('Tentativo registrazione...');
+  debugPrint('Email: ${_emailController.text}');
 
-    if (
-    _nameController.text.trim().isEmpty ||
-    _surnameController.text.trim().isEmpty||
-    _emailController.text.trim().isEmpty || 
-    _passwordController.text.isEmpty){
+  if (_nameController.text.trim().isEmpty ||
+      _surnameController.text.trim().isEmpty ||
+      _emailController.text.trim().isEmpty ||
+      _passwordController.text.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Compila tutti i campi'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    return;
+  }
+
+  setState(() => _isLoading = true);
+
+  try {
+    final user = await AuthService().createUserWithEmailAndPassword(
+      name: _nameController.text.trim(),
+      surname: _surnameController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    debugPrint('✅ Utente creato: ${user?.uid}');
+
+    if (mounted && user != null) {
+      Navigator.of(context).pop(); 
+    }
+  } catch (e) {
+    debugPrint('❌ Errore: $e');
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('compila tutti i campi'),
+        SnackBar(
+          content: Text(e.toString()),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
         ),
       );
-      return;
     }
+  } finally {
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
+  }
+}
 
-    setState(() => _isLoading =true);
+  Future<void> _signInWithGoogle() async{
+    setState(() {
+      _isGoogleLoading = true;
+    });
 
     try{
-      final user = await AuthService().createUserWithEmailAndPassword(
-        name: _nameController.text.trim(),
-        surname: _surnameController.text.trim(),
-        email: _emailController.text.trim(), 
-        password: _passwordController.text
-        );
+      
+      final user = await AuthService().signInWithGoogle();
 
-        debugPrint('✅ Utente creato: ${user?.uid}');
+      if (user == null){
+        setState(() {
+          _isGoogleLoading= false;
+        });
+        return;
+      }
+
+      debugPrint('autenticazione con google riuscita');
+    }
+    catch(e){
+      debugPrint('autenticazione con google non riuscita');
 
       if (mounted){
-        Navigator.pushReplacement(
-          context, 
-          MaterialPageRoute(
-            builder: (context) => RoleSelectionScreen(userId: user!.uid),
-            ),
-          );
-      }
-    }catch (e){
-      debugPrint('Errore: $e');
-      if (mounted) {
+        setState(() {
+          _isGoogleLoading = false;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text('Errore: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
       }
     }
   }
@@ -248,9 +279,7 @@ class _AttendanceRegisterScreenState extends State<AttendanceRegisterScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton.icon(
-                    onPressed: () {
-                      
-                    },
+                    onPressed: _isGoogleLoading ? null : _signInWithGoogle,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white, 
                       foregroundColor: Colors.black, 

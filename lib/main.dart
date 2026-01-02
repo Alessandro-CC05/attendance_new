@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import './ui/pages/login_page.dart';
-import './services/auth_service.dart';
+import './ui/widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,34 +19,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: StreamBuilder<User?>(
-        stream: AuthService().authStateChanges, 
-        builder: (context, snapshot){
-          // Mostra loading mentre controlla lo stato
-          if(snapshot.connectionState == ConnectionState.waiting){
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-          
-          // Se l'utente è loggato
-
-          /*
-          if(snapshot.hasData){
-            return const Scaffold(
-              body: Center(
-                child: Text('HOME - Utente loggato!'),
-              ),
-            );
-          }
-          */
-          
-          // Se l'utente NON è loggato
-          return const AttendanceLoginScreen();
-        }
-      )
+      home: const AuthWrapper(),
     );
   }
 }

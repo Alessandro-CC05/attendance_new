@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'registration_page.dart';
+import 'package:attendance_new/services/auth_service.dart';
+import 'package:attendance_new/ui/pages/password_reset_page.dart';
 
 class AttendanceLoginScreen extends StatefulWidget {
   const AttendanceLoginScreen({super.key});
@@ -12,6 +14,74 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isGoogleLoading = false;
+  bool _isLoading = false;
+
+  Future<void> _signInWithGoogle() async{
+    setState(() {
+      _isGoogleLoading = true;
+    });
+
+    try{
+      
+      final user = await AuthService().signInWithGoogle();
+
+      if (user == null){
+        setState(() {
+          _isGoogleLoading= false;
+        });
+        return;
+      }
+
+      debugPrint('autenticazione con google riuscita');
+    }
+    catch(e){
+      debugPrint('autenticazione con google non riuscita');
+
+      if (mounted){
+        setState(() {
+          _isGoogleLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Errore: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _signInWithEmailAndPassword() async{
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty
+        ){
+          debugPrint('email o password mancanti');
+          return;
+        }
+    
+    setState(() {
+        _isLoading = true;
+      });
+    
+    try{
+      await AuthService().signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text
+      );
+      debugPrint('✅autenticazione riuscita');
+    }
+    catch(e){
+      setState(() {
+        _isLoading = false;
+      });
+      debugPrint('❌autenticazione non riuscita: $e');
+    }
+
+    return;
+  }
 
   @override
   void dispose() {
@@ -104,7 +174,14 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                    },
                     child: Text(
                       'Forgot your password?',
                       style: TextStyle(
@@ -122,9 +199,7 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Handle login
-                    },
+                    onPressed: _isLoading? null : _signInWithEmailAndPassword,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF46ad5a),
                       shape: RoundedRectangleBorder(
@@ -176,19 +251,39 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
                 
                 const SizedBox(height: 20),
                 
-                // Social Login Buttons
-                Row(
-                  children: [
-
-                    Expanded(
-                      child: _buildSocialButton(
-                        'Google',
-                        Icons.g_mobiledata,
-                        () {},
-                      ),
+                // Google login
+                SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton.icon(
+                  onPressed: _isGoogleLoading ? null : _signInWithGoogle,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                    elevation: 0,
+                  ),
+                  icon: _isGoogleLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                          ),
+                        )
+                      : const Icon(Icons.g_mobiledata, size: 28, color: Colors.red),
+                  label: Text(
+                    _isGoogleLoading ? 'Signing in...' : 'Continue with Google',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
+              ),
                 
                 const SizedBox(height: 30),
                 
@@ -273,30 +368,6 @@ class _AttendanceLoginScreenState extends State<AttendanceLoginScreen> {
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 20,
             vertical: 18,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(String text, IconData icon, VoidCallback onPressed) {
-    return SizedBox(
-      height: 50,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF46ad5a),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 0,
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
           ),
         ),
       ),
