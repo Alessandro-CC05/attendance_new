@@ -1,3 +1,4 @@
+import 'package:attendance_new/ui/pages/attendance_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/course_model.dart';
@@ -28,7 +29,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
   bool _isLoading = false;
   bool _isAdvertising = false;
 
-  /// AVVIA SESSIONE + BLE
+  /// ▶️ AVVIA SESSIONE + BLE
   Future<void> _startSession() async {
     setState(() => _isLoading = true);
 
@@ -64,7 +65,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
     }
   }
 
-  /// CHIUDI SESSIONE + STOP BLE
+  /// ⛔ CHIUDI SESSIONE + STOP BLE
   Future<void> _endSession() async {
     if (_activeSessionId == null) return;
 
@@ -116,12 +117,14 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// CODICE CORSO
             Text(
               widget.course.code,
               style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 32),
 
+            /// BLOCCO SESSIONE
             if (_activeSessionId == null) ...[
               SizedBox(
                 width: double.infinity,
@@ -161,7 +164,6 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                 style: const TextStyle(color: Colors.white),
               ),
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -180,6 +182,38 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                 ),
               ),
             ],
+
+            const SizedBox(height: 32),
+
+            /// 📊 BOTTONE REPORT PRESENZE (NUOVO)
+            SizedBox(
+              width: double.infinity,
+              height: 55,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.bar_chart),
+                label: const Text(
+                  'Controlla presenze',
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF46ad5a),
+                  side: const BorderSide(color: Color(0xFF46ad5a)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => AttendanceReportPage(
+                        course: widget.course,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
