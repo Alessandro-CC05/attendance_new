@@ -1,3 +1,7 @@
+import 'package:attendance_new/models/course_model.dart';
+import 'package:attendance_new/services/course_service.dart';
+import 'package:attendance_new/ui/pages/add_course_page.dart';
+import 'package:attendance_new/ui/pages/student_course_page.dart';
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../services/auth_service.dart';
@@ -14,7 +18,7 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _currentIndex = 0;
 
-  final List<Map<String, dynamic>> _courses = [];
+  final CourseService _courseService = CourseService();
 
   @override
   Widget build(BuildContext context) {
@@ -130,81 +134,36 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // HEADER (può stare fuori)
           Padding(
             padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello,',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[400],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.userData.name,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.notifications_outlined,
+                    Text('Hello,',
+                        style: TextStyle(fontSize: 16, color: Colors.grey[400])),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.userData.name,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        size: 24,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'My Courses',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    '${_courses.length} courses',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[400],
-                    ),
-                  ),
+                  child: const Icon(Icons.notifications_outlined,
+                      color: Colors.white),
                 ),
               ],
             ),
@@ -212,51 +171,91 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
           const SizedBox(height: 16),
 
+          // 👇 TUTTO IL RESTO DIPENDE DA courses
           Expanded(
-            child: _courses.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.school_outlined,
-                          size: 80,
-                          color: Colors.grey[600],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No courses yet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[400],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add a course to get started',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+            child: StreamBuilder<List<CourseModel>>(
+              stream: _courseService.getStudentCourses(widget.userData.uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF46ad5a),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    itemCount: _courses.length,
-                    itemBuilder: (context, index) {
-                      return _buildCourseCard(_courses[index]);
-                    },
-                  ),
+                  );
+                }
+
+                final courses = snapshot.data ?? [];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TITOLO + CONTATORE
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'My Courses',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              '${courses.length} courses',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[400],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // LISTA CORSI
+                    Expanded(
+                      child: courses.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No courses yet',
+                                style: TextStyle(color: Colors.grey[400]),
+                              ),
+                            )
+                          : ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0),
+                              itemCount: courses.length,
+                              itemBuilder: (context, index) {
+                                return _buildCourseCard(courses[index]);
+                              },
+                            ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCourseCard(Map<String, dynamic> course) {
+
+  Widget _buildCourseCard(CourseModel course) {
+    final Color courseColor = Colors.green; // per ora fisso, poi dinamico
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -271,34 +270,46 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => StudentCourseScreen(
+                  course: course,
+                  studentId: widget.userData.uid,
+                ),
+              ),
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// HEADER
                 Row(
                   children: [
                     Container(
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: course['color'].withOpacity(0.2),
+                        color: courseColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
                         Icons.book_outlined,
-                        color: course['color'],
+                        color: courseColor,
                         size: 26,
                       ),
                     ),
                     const SizedBox(width: 16),
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            course['name'],
+                            course.name,
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
@@ -307,7 +318,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            course['teacher'],
+                            course.teacherName,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey[400],
@@ -316,28 +327,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                         ],
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getAttendanceColor(course['percentage'])
-                            .withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${course['percentage']}%',
-                        style: TextStyle(
-                          color: _getAttendanceColor(course['percentage']),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
                   ],
                 ),
+
                 const SizedBox(height: 16),
+
+                /// INFO
                 Row(
                   children: [
                     Icon(
@@ -347,7 +342,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      course['schedule'],
+                      course.schedule?.isNotEmpty == true
+                          ? course.schedule!
+                          : 'Schedule not set',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[400],
@@ -361,7 +358,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      course['room'],
+                      course.room,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[400],
@@ -369,32 +366,17 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: course['percentage'] / 100,
-                          backgroundColor: Colors.white.withOpacity(0.1),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _getAttendanceColor(course['percentage']),
-                          ),
-                          minHeight: 6,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      course['attendance'],
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+
+                /// STUDENTI ISCRITTI
+                Text(
+                  '${course.studentIds.length} students enrolled',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -403,6 +385,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       ),
     );
   }
+
 
   Widget _buildProfileView() {
     return SafeArea(
@@ -552,41 +535,16 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 
   void _showAddCourseDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromARGB(255, 45, 45, 45),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Add New Course',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: const Text(
-            'Course addition feature coming soon!',
-            style: TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  color: Color(0xFF46ad5a),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddCoursePage(
+          studentId: widget.userData.uid,
+        ),
+      ),
     );
   }
+
 
   void _showLogoutDialog() {
     showDialog(
