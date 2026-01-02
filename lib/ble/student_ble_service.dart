@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class StudentBleService {
@@ -9,7 +10,6 @@ class StudentBleService {
     required void Function(String detectedUuid) onDetected,
   }) async {
     if (_isScanning) return;
-
     _isScanning = true;
 
     await FlutterBluePlus.startScan(
@@ -18,16 +18,11 @@ class StudentBleService {
 
     _subscription = FlutterBluePlus.scanResults.listen((results) {
       for (final r in results) {
-        final serviceUuids = r.advertisementData.serviceUuids;
+        final uuids = r.advertisementData.serviceUuids;
+        if (uuids.isEmpty) continue;
 
-        if (serviceUuids.isEmpty) continue;
-
-        final detectedUuid = serviceUuids.first.toString();
-
-        // 👉 UUID trovato → stop definitivo
-        stopScan();
-        onDetected(detectedUuid);
-        return;
+        // ⚠️ NON stopScan QUI
+        onDetected(uuids.first.toString());
       }
     });
   }
@@ -37,7 +32,6 @@ class StudentBleService {
 
     await _subscription?.cancel();
     await FlutterBluePlus.stopScan();
-
     _subscription = null;
     _isScanning = false;
   }

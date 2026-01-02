@@ -38,32 +38,32 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
   void _startScan() async {
     if (_scanning) return;
     _scanning = true;
-
     await _ble.startScan(
       onDetected: (uuid) async {
         final sessionId =
             await _sessionService.getActiveSessionIdByBleUuid(uuid);
-
         if (sessionId == null) return;
-
+        await _ble.stopScan();
         if (!mounted) return;
-
         setState(() {
           _sessionId = sessionId;
           _signalDetected = true;
-          _status = 'Lezione trovata';
+          _status = 'Lezione rilevata';
         });
       },
     );
+
   }
 
   Future<void> _confirmPresence() async {
     if (_sessionId == null || _presenceConfirmed) return;
 
     await AttendanceService().confirmPresence(
-      sessionId: _sessionId!,
-      studentId: widget.studentId,
-    );
+            courseId: widget.course.id,
+            sessionId: _sessionId!,
+            studentId: widget.studentId,
+          );
+
 
     setState(() => _presenceConfirmed = true);
 
