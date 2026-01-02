@@ -1,28 +1,33 @@
 import 'dart:async';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class StudentBleService {
   bool _isScanning = false;
-  StreamSubscription<List<ScanResult>>? _scanSubscription;
+  StreamSubscription<List<ScanResult>>? _subscription;
 
   Future<void> startScan({
-    required Function(String detectedUuid) onDetected,
+    required void Function(String detectedUuid) onDetected,
   }) async {
     if (_isScanning) return;
+
     _isScanning = true;
 
-    await FlutterBluePlus.startScan();
+    await FlutterBluePlus.startScan(
+      timeout: const Duration(minutes: 5),
+    );
 
-    _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
-      for (final result in results) {
-        final serviceUuids = result.advertisementData.serviceUuids;
+    _subscription = FlutterBluePlus.scanResults.listen((results) {
+      for (final r in results) {
+        final serviceUuids = r.advertisementData.serviceUuids;
 
-        if (serviceUuids.isNotEmpty) {
-          final detectedGuid = serviceUuids.first;
-          onDetected(detectedGuid.toString());
+        if (serviceUuids.isEmpty) continue;
 
-        }
+        final detectedUuid = serviceUuids.first.toString();
+
+        // 👉 UUID trovato → stop definitivo
+        stopScan();
+        onDetected(detectedUuid);
+        return;
       }
     });
   }
@@ -30,14 +35,14 @@ class StudentBleService {
   Future<void> stopScan() async {
     if (!_isScanning) return;
 
-    await _scanSubscription?.cancel();
+    await _subscription?.cancel();
     await FlutterBluePlus.stopScan();
 
-    _scanSubscription = null;
+    _subscription = null;
     _isScanning = false;
   }
 
   Future<void> dispose() async {
-    await stopScan(); // ✅ qui sì
+    await stopScan();
   }
 }

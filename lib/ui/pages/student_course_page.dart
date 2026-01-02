@@ -19,129 +19,83 @@ class StudentCourseScreen extends StatefulWidget {
 }
 
 class _StudentCourseScreenState extends State<StudentCourseScreen> {
-  final StudentBleService _bleService = StudentBleService();
+  final StudentBleService _ble = StudentBleService();
   final SessionService _sessionService = SessionService();
 
   bool _signalDetected = false;
   bool _presenceConfirmed = false;
-  bool _isScanning = false;
+  bool _scanning = false;
 
-  String _statusText = 'Ricerca lezione in corso...';
+  String _status = 'Ricerca lezione in corso...';
   String? _sessionId;
 
   @override
   void initState() {
     super.initState();
-    _startBleScan();
+    _startScan();
   }
 
-  /// 🔍 Avvia scansione BLE
-  Future<void> _startBleScan() async {
-    if (_isScanning) return;
+  void _startScan() async {
+    if (_scanning) return;
+    _scanning = true;
 
-    setState(() {
-      _isScanning = true;
-      _statusText = 'Ricerca lezione in corso...';
-    });
+    await _ble.startScan(
+      onDetected: (uuid) async {
+        final sessionId =
+            await _sessionService.getActiveSessionIdByBleUuid(uuid);
 
-    try {
-      await _bleService.startScan(
-        onDetected: (bleUuid) async {
-          if (_signalDetected) return;
+        if (sessionId == null) return;
 
-          final sessionId =
-              await _sessionService.getActiveSessionIdByBleUuid(bleUuid);
+        if (!mounted) return;
 
-          if (!mounted) return;
-
-          if (sessionId == null) {
-            setState(() {
-              _statusText = 'Nessuna lezione attiva trovata';
-            });
-            return;
-          }
-
-          // ✅ TROVATA SESSIONE VALIDA → STOP SCAN
-          await _bleService.stopScan();
-
-          setState(() {
-            _sessionId = sessionId;
-            _signalDetected = true;
-            _isScanning = false;
-            _statusText = 'Lezione rilevata';
-          });
-        },
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _isScanning = false;
-        _statusText = 'Bluetooth non disponibile';
-      });
-    }
+        setState(() {
+          _sessionId = sessionId;
+          _signalDetected = true;
+          _status = 'Lezione trovata';
+        });
+      },
+    );
   }
 
-  /// ✅ Conferma presenza su Firestore
   Future<void> _confirmPresence() async {
     if (_sessionId == null || _presenceConfirmed) return;
 
-    try {
-      await AttendanceService().confirmPresence(
-        sessionId: _sessionId!,
-        studentId: widget.studentId,
-      );
+    await AttendanceService().confirmPresence(
+      sessionId: _sessionId!,
+      studentId: widget.studentId,
+    );
 
-      setState(() {
-        _presenceConfirmed = true;
-      });
+    setState(() => _presenceConfirmed = true);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Presenza registrata con successo'),
-          backgroundColor: Color(0xFF46ad5a),
-        ),
-      );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Presenza registrata'),
+        backgroundColor: Colors.green,
+      ),
+    );
 
-      await Future.delayed(const Duration(seconds: 2));
-
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Errore registrazione presenza: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) Navigator.pop(context);
   }
 
   @override
   void dispose() {
-    _bleService.dispose();
+    _ble.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 36, 36, 36),
+      backgroundColor: const Color(0xFF242424),
       appBar: AppBar(
         title: Text(widget.course.name),
         backgroundColor: Colors.transparent,
-        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.course.teacherName,
-              style: TextStyle(color: Colors.grey[400]),
-            ),
-
-            const SizedBox(height: 32),
-
             Row(
               children: [
                 Icon(
@@ -154,40 +108,30 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _statusText,
+                    _status,
                     style: TextStyle(
+                      color: _signalDetected
+                          ? Colors.green
+                          : Colors.grey[400],
                       fontSize: 16,
-                      color:
-                          _signalDetected ? Colors.green : Colors.grey[400],
                     ),
                   ),
                 ),
               ],
             ),
-
             const Spacer(),
-
             SizedBox(
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed:
-                    (_signalDetected && !_presenceConfirmed)
-                        ? _confirmPresence
-                        : null,
+                onPressed: _signalDetected ? _confirmPresence : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF46ad5a),
+                  backgroundColor: Colors.green,
                   disabledBackgroundColor: Colors.grey[700],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
                 ),
                 child: const Text(
                   'Conferma presenza',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ),
