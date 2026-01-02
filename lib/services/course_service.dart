@@ -111,15 +111,67 @@ class CourseService {
 
   Future<void> addStudentToCourse(String courseId, String studentId) async {
     try {
-      await _firestore.collection('courses').doc(courseId).update({
+      final batch = _firestore.batch();
+
+      final courseRef = _firestore.collection('courses').doc(courseId);
+      final userRef = _firestore.collection('users').doc(studentId);
+
+      batch.update(courseRef, {
         'studentIds': FieldValue.arrayUnion([studentId]),
       });
-      debugPrint('✅ Studente aggiunto al corso');
+
+      batch.update(userRef, {
+        'courses': FieldValue.arrayUnion([courseId]),
+      });
+
+      await batch.commit();
+
+      debugPrint('✅ Studente aggiunto al corso (bidirezionale)');
     } catch (e) {
       debugPrint('❌ Errore aggiunta studente: $e');
       rethrow;
     }
   }
+  Future<void> joinCourseByCode({
+    required String courseCode,
+    required String studentId,
+  }) async {
+    try {
+      final query = await _firestore
+          .collection('courses')
+          .where('code', isEqualTo: courseCode)
+          .limit(1)
+          .get();
+
+      if (query.docs.isEmpty) {
+        throw Exception('Corso non trovato');
+      }
+
+      final courseDoc = query.docs.first;
+      final courseId = courseDoc.id;
+
+      final batch = _firestore.batch();
+
+      batch.update(courseDoc.reference, {
+        'studentIds': FieldValue.arrayUnion([studentId]),
+      });
+
+      batch.set(
+        _firestore.collection('users').doc(studentId),
+        {'courses': FieldValue.arrayUnion([courseId])},
+        SetOptions(merge: true),
+      );
+
+      await batch.commit();
+
+      debugPrint('✅ Studente iscritto al corso tramite codice');
+    } catch (e) {
+      debugPrint('❌ Errore join corso: $e');
+      rethrow;
+    }
+  }
+
+
 
   Future<void> deleteCourse(String courseId) async {
     try {

@@ -1,3 +1,4 @@
+import 'package:attendance_new/ui/pages/teacher_course_detail_page.dart';
 import 'package:flutter/material.dart';
 import '../../models/user_model.dart';
 import '../../models/course_model.dart';
@@ -324,7 +325,17 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () {},
+          onTap: () {  
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TeacherCourseDetailPage(
+                  course: course,
+                  teacherId: widget.userData.uid,
+                ),
+              ),
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
