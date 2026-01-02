@@ -110,7 +110,17 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text(widget.course.name),
+        leading: IconButton(
+          color: Color.fromARGB(255, 193, 193, 193),
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.course.name,
+          style: TextStyle(
+            color: const Color.fromARGB(255, 193, 193, 193)
+          ),
+          ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -141,7 +151,10 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Avvia sessione presenze',
-                          style: TextStyle(fontSize: 18),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18
+                            ),
                         ),
                 ),
               ),
@@ -177,7 +190,10 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                   ),
                   child: const Text(
                     'Chiudi sessione',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18
+                      ),
                   ),
                 ),
               ),

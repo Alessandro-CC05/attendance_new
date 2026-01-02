@@ -60,7 +60,17 @@ class _AddCoursePageState extends State<AddCoursePage> {
       backgroundColor: const Color.fromARGB(255, 36, 36, 36),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text('Add Course'),
+        leading: IconButton(
+          color: Color.fromARGB(255, 193, 193, 193),
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Add Course',
+          style: TextStyle(
+            color: Color.fromARGB(255, 193, 193, 193)
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -96,7 +106,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
                         'Join Course',
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18
+                        ),
                       ),
               ),
             ),
