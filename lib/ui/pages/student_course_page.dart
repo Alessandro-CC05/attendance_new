@@ -89,8 +89,18 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF242424),
       appBar: AppBar(
-        title: Text(widget.course.name),
+        title: Text(
+          widget.course.name,
+          style: TextStyle(
+            color: const Color.fromARGB(255, 193, 193, 193)
+          ),
+          ),
         backgroundColor: Colors.transparent,
+        leading: IconButton(
+          color: Color.fromARGB(255, 193, 193, 193),
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -131,7 +141,9 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
                 ),
                 child: const Text(
                   'Conferma presenza',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18),
                 ),
               ),
             ),
