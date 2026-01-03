@@ -1,7 +1,7 @@
 import 'package:attendance_new/models/attendance_report_model.dart';
 import 'package:attendance_new/models/course_model.dart';
 import 'package:attendance_new/services/attendance_report_service.dart';
-import 'package:attendance_new/utils/attendance_csv_export.dart';
+import 'package:attendance_new/utils/attendance_csv_service.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceReportPage extends StatefulWidget {
@@ -49,22 +49,29 @@ class _AttendanceReportPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Report presenze'),
+        title: const Text('Report presenze'),
         actions: [
           IconButton(
+            tooltip: 'Scarica CSV',
             icon: const Icon(Icons.download),
             onPressed: _report.isEmpty
                 ? null
                 : () async {
-                    final file =
-                        await exportAttendanceCsv(_report);
+                    await AttendanceCsvService.saveCsv(_report);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'CSV salvato: ${file.path}',
-                        ),
+                      const SnackBar(
+                        content: Text('CSV salvato sul dispositivo'),
                       ),
                     );
+                  },
+          ),
+          IconButton(
+            tooltip: 'Condividi CSV',
+            icon: const Icon(Icons.share),
+            onPressed: _report.isEmpty
+                ? null
+                : () async {
+                    await AttendanceCsvService.shareCsv(_report);
                   },
           ),
         ],
