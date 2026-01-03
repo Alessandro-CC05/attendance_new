@@ -3,6 +3,9 @@ import '../../models/course_model.dart';
 import '../../ble/student_ble_service.dart';
 import '../../services/session_service.dart';
 import '../../services/attendance_service.dart';
+import 'package:attendance_new/utils/network_utils.dart';
+import 'package:app_settings/app_settings.dart';
+
 
 class StudentCourseScreen extends StatefulWidget {
   final CourseModel course;
@@ -37,6 +40,11 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
 
   void _startScan() async {
     if (_scanning) return;
+    final hasInternet = await NetworkUtils.hasConnection();
+    if (!hasInternet) {
+      _showNoInternetDialog();
+      return;
+    }
     _scanning = true;
     await _ble.startScan(
       onDetected: (uuid) async {
@@ -54,6 +62,31 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
     );
 
   }
+  void _showNoInternetDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Connessione richiesta'),
+        content: const Text(
+          'Per confermare la presenza è necessaria una connessione Internet attiva.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annulla'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              AppSettings.openAppSettings(type: AppSettingsType.wifi);
+            },
+            child: const Text('Attiva connessione'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Future<void> _confirmPresence() async {
     if (_sessionId == null || _presenceConfirmed) return;
