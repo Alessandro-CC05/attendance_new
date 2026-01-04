@@ -1,4 +1,5 @@
 import 'package:attendance_new/models/session_model.dart';
+import 'package:attendance_new/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 

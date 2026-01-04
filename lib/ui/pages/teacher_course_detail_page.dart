@@ -2,6 +2,10 @@ import 'package:attendance_new/ui/pages/attendance_report_page.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/course_model.dart';
+import '../../models/session_model.dart';
+import '../../models/user_model.dart';
+import '../../services/attendance_service.dart';
+import '../../services/course_service.dart';
 import '../../services/session_service.dart';
 import '../../ble/teacher_ble_service.dart';
 
@@ -23,6 +27,8 @@ class TeacherCourseDetailPage extends StatefulWidget {
 class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
   final SessionService _sessionService = SessionService();
   final TeacherBleService _bleService = TeacherBleService();
+  final CourseService _courseService = CourseService();
+  final AttendanceService _attendanceService = AttendanceService();
 
   String? _activeSessionId;
   String? _bleUuid;
@@ -93,6 +99,180 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
         ),
       );
     }
+  }
+
+  String _formatSessionDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    final year = date.year.toString();
+    final hour = date.hour.toString().padLeft(2, '0');
+    final minute = date.minute.toString().padLeft(2, '0');
+    return '$day/$month/$year $hour:$minute';
+  }
+
+  Future<void> _showManualAttendanceDialog() async {
+    final rootContext = context;
+    bool dialogInitialized = false;
+    bool loading = true;
+    String? error;
+
+    final sessions = <SessionModel>[];
+    final students = <UserModel>[];
+    SessionModel? selectedSession;
+    UserModel? selectedStudent;
+
+    showDialog(
+      context: rootContext,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            if (!dialogInitialized) {
+              dialogInitialized = true;
+              Future.wait([
+                _courseService.getSessionsForCourse(widget.course.id),
+                _courseService.getStudentsInCourse(widget.course.id),
+              ]).then((values) {
+                if (!mounted) return;
+                final loadedSessions = values[0] as List<SessionModel>;
+                final loadedStudents = values[1] as List<UserModel>;
+
+                loadedSessions.sort(
+                  (a, b) => b.startedAt.compareTo(a.startedAt),
+                );
+                loadedStudents.sort((a, b) {
+                  final aName = '${a.surname} ${a.name}'.toLowerCase();
+                  final bName = '${b.surname} ${b.name}'.toLowerCase();
+                  return aName.compareTo(bName);
+                });
+
+                setDialogState(() {
+                  sessions.addAll(loadedSessions);
+                  students.addAll(loadedStudents);
+                  loading = false;
+                });
+              }).catchError((e) {
+                if (!mounted) return;
+                setDialogState(() {
+                  error = e.toString();
+                  loading = false;
+                });
+              });
+            }
+
+            final hasSessions = sessions.isNotEmpty;
+            final hasStudents = students.isNotEmpty;
+            final canSave = !loading &&
+                error == null &&
+                selectedSession != null &&
+                selectedStudent != null;
+
+            return AlertDialog(
+              title: const Text('Aggiungi presenza manuale'),
+              content: loading
+                  ? const SizedBox(
+                      height: 120,
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : error != null
+                      ? Text('Errore: $error')
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            DropdownButtonFormField<SessionModel>(
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Data sessione',
+                              ),
+                              hint: const Text('Seleziona sessione'),
+                              items: sessions.map((session) {
+                                return DropdownMenuItem(
+                                  value: session,
+                                  child: Text(
+                                    _formatSessionDate(session.startedAt),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: hasSessions
+                                  ? (value) => setDialogState(() {
+                                        selectedSession = value;
+                                      })
+                                  : null,
+                            ),
+                            if (!hasSessions)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: Text('Nessuna sessione disponibile'),
+                              ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<UserModel>(
+                              isExpanded: true,
+                              decoration: const InputDecoration(
+                                labelText: 'Studente',
+                              ),
+                              hint: const Text('Seleziona studente'),
+                              items: students.map((student) {
+                                final fullName =
+                                    '${student.name} ${student.surname}';
+                                return DropdownMenuItem(
+                                  value: student,
+                                  child: Text(fullName),
+                                );
+                              }).toList(),
+                              onChanged: hasStudents
+                                  ? (value) => setDialogState(() {
+                                        selectedStudent = value;
+                                      })
+                                  : null,
+                            ),
+                            if (!hasStudents)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: Text('Nessuno studente iscritto'),
+                              ),
+                          ],
+                        ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: const Text('Annulla'),
+                ),
+                ElevatedButton(
+                  onPressed: canSave
+                      ? () async {
+                          try {
+                            await _attendanceService.confirmPresence(
+                              courseId: widget.course.id,
+                              sessionId: selectedSession!.id,
+                              studentId: selectedStudent!.uid,
+                            );
+                              if (!mounted) return;
+                            Navigator.pop(dialogContext);
+                            ScaffoldMessenger.of(rootContext).showSnackBar(
+                              const SnackBar(
+                                content: Text('Presenza aggiunta'),
+                                backgroundColor: Color(0xFF46ad5a),
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(rootContext).showSnackBar(
+                              SnackBar(
+                                content:
+                                    Text('Errore aggiunta presenza: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                      : null,
+                  child: const Text('Salva'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -201,7 +381,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
 
             const SizedBox(height: 32),
 
-            /// 📊 BOTTONE REPORT PRESENZE (NUOVO)
+            /// BOTTONE REPORT PRESENZE (NUOVO)
             SizedBox(
               width: double.infinity,
               height: 55,
@@ -228,6 +408,25 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                     ),
                   );
                 },
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(height: 55,
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.bar_chart),
+                label: const Text(
+                  'Aggiungi Presenza Manualmente',
+                  style: TextStyle(fontSize: 16),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF46ad5a),
+                  side: const BorderSide(color: Color(0xFF46ad5a)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: _showManualAttendanceDialog,
               ),
             ),
           ],

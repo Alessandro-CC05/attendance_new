@@ -1,39 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class SessionModel{
+class SessionModel {
   final String id;
   final String courseId;
   final String teacherId;
-  final DateTime startTime;
-  final DateTime endTime;
-  final bool isActive;
+  final String bleUuid;
+  final DateTime startedAt;
+  final DateTime? endedAt;
 
   SessionModel({
-  required this.id,
-  required this.courseId,
-  required this.teacherId,
-  required this.startTime,
-  required this.endTime,
-  required this.isActive,
+    required this.id,
+    required this.courseId,
+    required this.teacherId,
+    required this.bleUuid,
+    required this.startedAt,
+    required this.endedAt,
   });
 
-  Map<String, dynamic> toMap()=>{
-    'id': id,
-    'courseId': courseId,
-    'teacherId': teacherId,
-    'startTime': Timestamp.fromDate(startTime),
-    'endTime': Timestamp.fromDate(endTime),
-    'isActive': isActive,
-  };
-  factory SessionModel.fromFirestore(DocumentSnapshot doc){
-    final data = doc.data() as Map<String, dynamic>;
+  factory SessionModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw Exception('Sessione ${doc.id} senza dati');
+    }
+
+    final Timestamp startedTs = data['startedAt'];
+    final Timestamp? endedTs = data['endedAt'];
+
     return SessionModel(
       id: doc.id,
-      courseId: data['courseId'] ?? '',
-      teacherId: data['teacherId'] ?? '',
-      startTime: DateTime.parse(data['startTime']),
-      endTime: DateTime.parse(data['endTime']),
-      isActive: data['isActive'] ?? false,
+      courseId: data['courseId'] as String,
+      teacherId: data['teacherId'] as String,
+      bleUuid: data['bleUuid'] as String,
+      startedAt: startedTs.toDate(),
+      endedAt: endedTs?.toDate(),
     );
   }
+
+  bool get isActive => endedAt == null;
 }
