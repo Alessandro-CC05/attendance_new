@@ -111,6 +111,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
   }
 
   Future<void> _showManualAttendanceDialog() async {
+    final rootContext = context;
     bool dialogInitialized = false;
     bool loading = true;
     String? error;
@@ -121,10 +122,10 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
     UserModel? selectedStudent;
 
     showDialog(
-      context: context,
-      builder: (context) {
+      context: rootContext,
+      builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (context, setDialogState) {
+          builder: (dialogContext, setDialogState) {
             if (!dialogInitialized) {
               dialogInitialized = true;
               Future.wait([
@@ -232,7 +233,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                         ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => Navigator.pop(dialogContext),
                   child: const Text('Annulla'),
                 ),
                 ElevatedButton(
@@ -244,9 +245,9 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                               sessionId: selectedSession!.id,
                               studentId: selectedStudent!.uid,
                             );
-                            if (!mounted) return;
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
+                              if (!mounted) return;
+                            Navigator.pop(dialogContext);
+                            ScaffoldMessenger.of(rootContext).showSnackBar(
                               const SnackBar(
                                 content: Text('Presenza aggiunta'),
                                 backgroundColor: Color(0xFF46ad5a),
@@ -254,7 +255,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                             );
                           } catch (e) {
                             if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(rootContext).showSnackBar(
                               SnackBar(
                                 content:
                                     Text('Errore aggiunta presenza: $e'),
@@ -409,6 +410,7 @@ class _TeacherCourseDetailPageState extends State<TeacherCourseDetailPage> {
                 },
               ),
             ),
+            const SizedBox(height: 16),
             SizedBox(height: 55,
               width: double.infinity,
               child: OutlinedButton.icon(

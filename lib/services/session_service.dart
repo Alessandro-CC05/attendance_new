@@ -1,4 +1,5 @@
 import 'package:attendance_new/models/session_model.dart';
+import 'package:attendance_new/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
@@ -38,14 +39,6 @@ class SessionService {
 
     if (query.docs.isEmpty) return null;
     return SessionModel.fromFirestore(query.docs.first);
-  }
-
-  Future<SessionModel?> getSessionByCourseId(String courseId) async {
-    final doc =
-        await _firestore.collection('sessions').doc(courseId).get();
-
-    if (!doc.exists) return null;
-    return SessionModel.fromFirestore(doc);
   }
 
 }
