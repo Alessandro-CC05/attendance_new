@@ -1,3 +1,5 @@
+import 'package:attendance_new/models/session_model.dart';
+import 'package:attendance_new/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/course_model.dart';
@@ -182,4 +184,47 @@ class CourseService {
       rethrow;
     }
   }
+  Future<SessionModel?> getSessionByCourseId(String courseId) async {
+    final doc =
+        await _firestore.collection('sessions').doc(courseId).get();
+
+    if (!doc.exists) return null;
+    return SessionModel.fromFirestore(doc);
+  }
+
+  Future<List<SessionModel>> getSessionsForCourse(String courseId) async {
+    final sessionsQuery = await _firestore
+        .collection('sessions')
+        .where('courseId', isEqualTo: courseId)
+        .get();
+
+    final sessions = sessionsQuery.docs
+        .map((doc) => SessionModel.fromFirestore(doc))
+        .toList();
+
+    sessions.sort((a, b) => b.startedAt.compareTo(a.startedAt));
+    return sessions;
+  }
+
+  Future<List<UserModel>> getStudentsInCourse(String courseId) async {
+    final courseDoc =
+        await _firestore.collection('courses').doc(courseId).get();
+
+    if (!courseDoc.exists) return [];
+
+    final data = courseDoc.data() as Map<String, dynamic>;
+    final List<dynamic> studentIds = data['studentIds'] ?? [];
+
+    if (studentIds.isEmpty) return [];
+
+    final studentsQuery = await _firestore
+        .collection('users')
+        .where('uid', whereIn: studentIds)
+        .get();
+
+    return studentsQuery.docs
+        .map((doc) => UserModel.fromFirestore(doc))
+        .toList();
+  } 
+
 }
