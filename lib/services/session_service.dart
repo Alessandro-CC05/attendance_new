@@ -1,3 +1,4 @@
+import 'package:attendance_new/models/session_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:uuid/uuid.dart';
 
@@ -27,7 +28,7 @@ class SessionService {
       'endedAt': FieldValue.serverTimestamp(),
     });
   }
-  Future<String?> getActiveSessionIdByBleUuid(String bleUuid) async {
+  Future<SessionModel?> getActiveSessionByBleUuid(String bleUuid) async {
     final query = await _firestore
         .collection('sessions')
         .where('bleUuid', isEqualTo: bleUuid)
@@ -36,7 +37,7 @@ class SessionService {
         .get();
 
     if (query.docs.isEmpty) return null;
-    return query.docs.first.id;
+    return SessionModel.fromFirestore(query.docs.first);
   }
 
 }

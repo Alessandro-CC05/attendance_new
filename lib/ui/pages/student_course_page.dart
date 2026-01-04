@@ -48,13 +48,13 @@ class _StudentCourseScreenState extends State<StudentCourseScreen> {
     _scanning = true;
     await _ble.startScan(
       onDetected: (uuid) async {
-        final sessionId =
-            await _sessionService.getActiveSessionIdByBleUuid(uuid);
-        if (sessionId == null) return;
+        final session =
+            await _sessionService.getActiveSessionByBleUuid(uuid);
+        if (session == null || session.courseId != widget.course.id) return;
         await _ble.stopScan();
         if (!mounted) return;
         setState(() {
-          _sessionId = sessionId;
+          _sessionId = session.id;
           _signalDetected = true;
           _status = 'Lezione rilevata';
         });
