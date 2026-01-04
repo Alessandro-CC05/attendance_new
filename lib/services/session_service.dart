@@ -40,4 +40,12 @@ class SessionService {
     return SessionModel.fromFirestore(query.docs.first);
   }
 
+  Future<SessionModel?> getSessionByCourseId(String sessionId) async {
+    final doc =
+        await _firestore.collection('sessions').doc(sessionId).get();
+
+    if (!doc.exists) return null;
+    return SessionModel.fromFirestore(doc);
+  }
+
 }
