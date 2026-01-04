@@ -21,7 +21,6 @@ class StudentBleService {
         final uuids = r.advertisementData.serviceUuids;
         if (uuids.isEmpty) continue;
 
-        // ⚠️ NON stopScan QUI
         onDetected(uuids.first.toString());
       }
     });
