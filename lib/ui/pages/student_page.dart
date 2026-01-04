@@ -134,7 +134,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HEADER (può stare fuori)
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Row(
@@ -156,22 +155,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     ),
                   ],
                 ),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.notifications_outlined,
-                      color: Colors.white),
-                ),
               ],
             ),
           ),
 
           const SizedBox(height: 16),
 
-          // 👇 TUTTO IL RESTO DIPENDE DA courses
           Expanded(
             child: StreamBuilder<List<CourseModel>>(
               stream: _courseService.getStudentCourses(widget.userData.uid),
@@ -189,7 +178,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // TITOLO + CONTATORE
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24.0),
                       child: Row(
@@ -224,7 +212,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
                     const SizedBox(height: 16),
 
-                    // LISTA CORSI
                     Expanded(
                       child: courses.isEmpty
                           ? Center(
@@ -402,14 +389,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.settings_outlined,
-                    color: Colors.white,
-                    size: 24,
                   ),
                 ),
               ],
